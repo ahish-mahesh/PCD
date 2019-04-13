@@ -1,0 +1,216 @@
+/* C++ implementation to convert infix expression to postfix*/
+// Note that here we use std::stack for Stack operations
+#include<bits/stdc++.h>
+using namespace std;
+//char input[20][40];
+vector<vector<char> > quad;
+    vector<vector<char> > add;
+    vector<vector<char> > triple;
+
+
+//Function to return precedence of operators
+int k=65;
+void tripleFun(){
+    triple=quad;
+    for(int i=0;i<triple.size();i++){
+        for(int j=i+1;j<triple.size();j++){
+            if(triple[i][4]==triple[j][2]){
+                triple[j][2]=triple[i][0];
+            }
+            if(triple[i][4]==triple[j][3]){
+                triple[j][3]=triple[i][0];
+            }
+        }
+        triple[i][4]='\0';
+    }
+    cout<<"Triple\n";
+    for(int i=0;i<triple.size();i++){
+        for(int j=0;j<triple[i].size();j++){
+            cout<<triple[i][j]<<" ";
+        }
+        cout<<"\n";
+    }
+}
+
+int prec(char c)
+{
+	if(c == '^')
+	return 3;
+	else if(c == '*' || c == '/')
+	return 2;
+	else if(c == '+' || c == '-')
+	return 1;
+	else
+	return -1;
+}
+void threeAdd(string s){
+    int k=65;
+    int j=0;
+    char op1,op2,op;
+    list<char> sym;
+    for(int i=0;i<s.length();i++){
+        //j=0;
+        vector<char> temp;
+        if(s[i]=='+'|| s[i]=='-' || s[i]=='^' || s[i]=='*'||s[i]=='/'){
+            op2=sym.back();
+            sym.pop_back();
+            op1=sym.back();
+            sym.pop_back();
+            op=s[i];
+            temp.push_back(char(k));
+            temp.push_back('=');
+            temp.push_back(op1);
+            temp.push_back(op);
+            temp.push_back(op2);
+            sym.push_back(char(k));
+            k++;
+            add.push_back(temp);
+
+           //j++;
+        }
+        else{
+            sym.push_back(s[i]);
+
+        }
+
+    }
+  for(int i=0;i<add.size();i++){
+        for(int j=0;j<add[i].size();j++){
+            cout<<add[i][j]<<" ";
+        }
+        cout<<"\n";
+    }
+    //for(int i=0;i<)
+    //COMMON SUB EXPRESSION ELIMINATION AND COPY PROPOGATION
+        cout<<"\nCOMMON SUBEXPRESSION ELIMINATION\n";
+        for(int i=0;i<add.size();i++){
+            for(int j=i+1;j<add.size();j++){
+                if(add[i][2]==add[j][2] && add[i][3]==add[j][3] && add[i][4]==add[j][4]){
+                    //cout<<"\nee "<<add[j][0]<<" "<<add[j][1]<<" "<<add[j][2];
+                    if(add[i][3]!='\0'){
+                    add[j][2]=add[i][0];
+                    add[j][3]='\0';
+                    add[j][4]='\0';
+                    }
+                }
+            }
+        }
+        for(int i=0;i<add.size();i++){
+                for(int j=0;j<add[i].size();j++){
+                        cout<<add[i][j]<<" ";
+                }
+                cout<<"\n";
+        }
+
+}
+void quadFun(int num){
+
+    char op,res,op1,op2;
+    for(int i=0;i<num;i++){
+        vector<char> temp;
+        //cout<<"FOR";0
+        for(int j=0;j<add[i].size();j++){
+
+            if(add[i][j]=='='){
+                res=add[i][j-1];
+                temp.push_back(res);
+                //cout<<"heyyy";
+            }
+            else if(add[i][j]=='+' || add[i][j]=='-' || add[i][j]=='*' || add[i][j]=='/'){
+                //cout<<"poo";
+                op=add[i][j];
+                op1=add[i][j-1];
+                op2=add[i][j+1];
+             //   cout<<"\nop ="<<op<<" op1 = "<<op1<<" op2 = "<<op2<<"\n";
+                temp.insert(temp.begin(), op2);
+                temp.insert(temp.begin(),op1);
+                temp.insert(temp.begin(),op);
+            }
+        }
+        //temp.insert(temp.begin(),char(k));
+        temp.insert(temp.begin(),char(k-17));
+        k++;
+        //temp.push_front(char(i));
+        quad.push_back(temp);
+    }
+    cout<<"Quadraple\n";
+    for(int i=0;i<quad.size();i++){
+        for(int j=0;j<quad[i].size();j++){
+            cout<<quad[i][j]<<" ";
+        }
+        cout<<"\n";
+    }
+    tripleFun();
+}
+
+// The main function to convert infix expression
+//to postfix expression
+void infixToPostfix(string s)
+{
+	std::stack<char> st;
+	st.push('N');
+	int l = s.length();
+	string ns;
+	for(int i = 0; i < l; i++)
+	{
+		// If the scanned character is an operand, add it to output string.
+		if((s[i] >= 'a' && s[i] <= 'z')||(s[i] >= 'A' && s[i] <= 'Z'))
+		ns+=s[i];
+
+		// If the scanned character is an ‘(‘, push it to the stack.
+		else if(s[i] == '(')
+
+		st.push('(');
+
+		// If the scanned character is an ‘)’, pop and to output string from the stack
+		// until an ‘(‘ is encountered.
+		else if(s[i] == ')')
+		{
+			while(st.top() != 'N' && st.top() != '(')
+			{
+				char c = st.top();
+				st.pop();
+			ns += c;
+			}
+			if(st.top() == '(')
+			{
+				char c = st.top();
+				st.pop();
+			}
+		}
+
+		//If an operator is scanned
+		else{
+			while(st.top() != 'N' && prec(s[i]) <= prec(st.top()))
+			{
+				char c = st.top();
+				st.pop();
+				ns += c;
+			}
+			st.push(s[i]);
+		}
+
+	}
+	//Pop all the remaining elements from the stack
+	while(st.top() != 'N')
+	{
+		char c = st.top();
+		st.pop();
+		ns += c;
+	}
+
+	cout << ns << endl;
+    threeAdd(ns);
+}
+
+//Driver program to test above functions
+int main()
+{
+	string exp;
+	cout<<"Enter expression : ";
+	cin>>exp;
+	infixToPostfix(exp);
+	quadFun(add.size());
+	return 0;
+}
+// This code is contributed by Gautam Singh
